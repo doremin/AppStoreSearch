@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TestingRootViewController: UIViewController {
+final class TestingViewController: UIViewController {
   lazy var testingLabel: UILabel = {
     let label = UILabel()
     label.text = "Running Unit Tests ..."

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   
@@ -23,9 +22,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     configurationForConnecting connectingSceneSession: UISceneSession,
     options: UIScene.ConnectionOptions)
   -> UISceneConfiguration {
-    let sceneConfiguration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+    let sceneConfiguration = UISceneConfiguration(
+      name: "Default Configuration",
+      sessionRole: connectingSceneSession.role)
     sceneConfiguration.delegateClass = SceneDelegate.self
-    sceneConfiguration.storyboard = nil
     
     return sceneConfiguration
   }

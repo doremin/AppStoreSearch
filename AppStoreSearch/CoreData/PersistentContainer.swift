@@ -15,11 +15,16 @@ enum PersistentContainerError: Error {
 
 protocol PersistentContainer {
   func saveContext()
+  func perform(_ task: @escaping (NSManagedObjectContext) -> Void)
 }
 
 final class PersistentContainerImpl: PersistentContainer {
+  
+  static let shared = PersistentContainerImpl()
+  
+  private init() { }
 
-  lazy var persistentContainer: NSPersistentContainer = {
+  private lazy var persistentContainer: NSPersistentContainer = {
     let container = NSPersistentContainer(name: "AppStoreSearch")
     container.loadPersistentStores { (_, error) in
       if let error = error as NSError? {
