@@ -26,14 +26,26 @@ extension AppDependency {
     let window = UIWindow(windowScene: windowScene)
     let persistentContainer = PersistentContainerImpl.shared
     let appConfiguration = AppConfigurationImpl()
-    let homeViewController = HomeViewController(appConfiguration: appConfiguration)
+    
+    let homeViewModel = HomeViewModel(appConfiguration: appConfiguration)
+    let homeViewController = HomeViewController(viewModel: homeViewModel)
+    
     let settingsViewController = SettingsViewController(appConfiguration: appConfiguration)
+    
+    let mainTabBarViewModel = MainTabBarViewModel(appConfiguration: appConfiguration)
     let mainTabBarController = MainTabBarController(
-      homeViewController,
+      viewModel: mainTabBarViewModel,
+      viewControllers: homeViewController,
       settingsViewController)
     
+    _ = appConfiguration.isDarkMode
+      .map { isDarkMode -> UIUserInterfaceStyle in
+        return isDarkMode ? .dark : .light
+      }
+      .bind(to: window.rx.overrideUserInterfaceStyle)
+    
     window.rootViewController = mainTabBarController
-    window.makeKeyAndVisible()    
+    window.makeKeyAndVisible()
     
     return AppDependency(
       window: window,

@@ -19,9 +19,10 @@ class BaseViewController: UIViewController {
   // MARK: Rx
   var disposeBag = DisposeBag()
   
-  // MARK: Initializing
+  // MARK: Initializer
   init() {
     super.init(nibName: nil, bundle: nil)
+    // TODO: Add Log
   }
   
   required init?(coder: NSCoder) {
@@ -33,21 +34,15 @@ class BaseViewController: UIViewController {
     // TODO: Add Log
   }
   
-  // MARK: Layout Constraints
-  private(set) var didSetupConstraints = false
-  
+  // MARK: Life Cycle
   override func viewDidLoad() {
-    self.view.setNeedsUpdateConstraints()
+    addSubviews()
+    setupConstraints()
+    bind()
   }
   
-  override func updateViewConstraints() {
-    if !didSetupConstraints {
-      addSubviews()
-      setupConstraints()
-      didSetupConstraints = true
-    }
-    
-    super.updateViewConstraints()
+  func bind() {
+    // Override point
   }
   
   func addSubviews() {

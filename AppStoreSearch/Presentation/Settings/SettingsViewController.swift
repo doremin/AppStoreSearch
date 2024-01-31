@@ -11,6 +11,7 @@ final class SettingsViewController: BaseViewController {
   
   // MARK: UI
   private let stackView = UIStackView()
+  private let darkModeSwitch = UISwitch()
   
   // MARK: Properties
   private let appConfiguration: AppConfiguration
@@ -28,15 +29,46 @@ final class SettingsViewController: BaseViewController {
     fatalError("init(coder:) has not been implemented")
   }
   
-  // MARK: 
+  // MARK: Life Cycle
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    appConfiguration
+      .backgroundColor
+      .bind(to: view.rx.backgroundColor)
+      .disposed(by: disposeBag)
+    
+    appConfiguration.isDarkMode
+      .bind(to: darkModeSwitch.rx.isOn)
+      .disposed(by: disposeBag)
+    
+    darkModeSwitch
+      .rx
+      .value
+      .changed
+      .distinctUntilChanged()
+      .bind(to: appConfiguration.isDarkMode)
+      .disposed(by: disposeBag)
+  }
   
   // MARK: Layout
   override func addSubviews() {
-    
+    view.add {
+      stackView.add {
+        darkModeSwitch
+      }
+    }
   }
   
   override func setupConstraints() {
+    stackView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
     
+    darkModeSwitch.snp.makeConstraints { make in
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+      make.left.equalToSuperview().offset(30)
+    }
   }
 }
 
