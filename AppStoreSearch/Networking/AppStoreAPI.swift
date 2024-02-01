@@ -15,7 +15,10 @@ enum AppStoreAPI {
 
 extension AppStoreAPI: TargetType {
   var baseURL: URL {
-    guard let baseURL = Bundle.main.object(forInfoDictionaryKey: "BaseURL") as? URL else {
+    guard
+      let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BaseURL") as? String,
+      let baseURL = URL(string: baseURLString)
+    else {
       fatalError("BaseURL in plist is empty")
     }
     
