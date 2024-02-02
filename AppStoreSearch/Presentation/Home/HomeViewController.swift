@@ -155,16 +155,31 @@ final class HomeViewController: BaseViewController {
       .disposed(by: disposeBag)
     
     // navigation
+    // Todo: move to viewmodel and send false to IsActive
     Observable
       .zip(tableView.rx.itemSelected, tableView.rx.modelSelected(SearchHistory.self))
       .subscribe(with: self, onNext: { owner, modelInfo in
         let (indexPath, searchHistory) = modelInfo
-        guard let vc = owner.searchResultViewControllerFactory?(searchHistory.query) else {
-          return
-        }
-        
         owner.tableView.deselectRow(at: indexPath, animated: true)
-        owner.navigationController?.pushViewController(vc, animated: true)
+        owner.presentSearchResultViewController(query: searchHistory.query)
+      })
+      .disposed(by: disposeBag)
+    
+    let query = searchController.searchBar
+      .rx
+      .text
+      .orEmpty
+      .filter { $0 != "" }
+    
+    let searchButtonClicked = searchController.searchBar
+      .rx
+      .searchButtonClicked
+    
+    // Todo: move to viewmodel and send false to IsActive
+    query
+      .sample(searchButtonClicked)
+      .subscribe(with: self, onNext: { owner, query in
+        owner.presentSearchResultViewController(query: query)
       })
       .disposed(by: disposeBag)
   }
@@ -184,6 +199,14 @@ final class HomeViewController: BaseViewController {
         
         return cell
       })
+  }
+  
+  private func presentSearchResultViewController(query: String) {
+    guard let vc = self.searchResultViewControllerFactory?(query) else {
+      return
+    }
+    
+    navigationController?.pushViewController(vc, animated: true)
   }
 }
 
