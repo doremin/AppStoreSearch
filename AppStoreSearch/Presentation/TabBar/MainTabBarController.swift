@@ -44,9 +44,6 @@ final class MainTabBarController: UITabBarController {
   
   // MARK: Bind ViewModel
   func bind() {
-    let input = MainTabBarViewModel.Input()
-    let output = viewModel.transform(input: input)
-    
     
   }
 }

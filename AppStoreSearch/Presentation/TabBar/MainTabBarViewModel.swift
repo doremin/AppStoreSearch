@@ -18,11 +18,10 @@ final class MainTabBarViewModel: ViewModel {
   
   // MARK: Output
   struct Output {
-    let style: Observable<UIBarStyle>
     
   }
   
-  // MARK: State
+  // MARK: Properties
   private let appConfiguration: AppConfiguration
   
   // MARK: DisposeBag
@@ -35,10 +34,6 @@ final class MainTabBarViewModel: ViewModel {
   
   // MARK: Transform Input -> Output
   func transform(input: Input) -> Output {
-    let style = appConfiguration
-      .isDarkMode
-      .map { $0 ? UIBarStyle.black : .default }
-    
-    return .init(style: style)
+    return .init()
   }
 }
