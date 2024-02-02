@@ -28,7 +28,16 @@ extension AppDependency {
     let appConfiguration = AppConfigurationImpl()
     
     let homeViewModel = HomeViewModel(appConfiguration: appConfiguration)
-    let homeViewController = HomeViewController(viewModel: homeViewModel)
+    let homeViewController = HomeViewController(
+      viewModel: homeViewModel,
+      searchResultViewControllerFactory: { query in
+        let searchResultViewModel = SearchResultViewModel(
+          query: query,
+          appConfiguration: appConfiguration)
+        let searchResultViewController = SearchResultViewController(viewModel: searchResultViewModel)
+        
+        return searchResultViewController
+      })
     
     let settingsViewModel = SettingsViewModel(appConfiguration: appConfiguration)
     let settingsViewController = SettingsViewController(viewModel: settingsViewModel)

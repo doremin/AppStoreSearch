@@ -9,11 +9,27 @@ import UIKit
 
 import RxCocoa
 import RxSwift
+import RxDataSources
 
 final class HomeViewController: BaseViewController {
   
   // MARK: Properties
   private let viewModel: HomeViewModel
+  private let searchResultViewControllerFactory: ((String) -> SearchResultViewController)?
+  private let dataSource = RxTableViewSectionedReloadDataSource<SearchHistorySection>(
+    configureCell: { dataSource, tableView, indexPath, item in
+      let dequeuedCell = tableView.dequeueReusableCell(
+        withIdentifier: SearchHistoryTableViewCell.reuseIdentifier,
+        for: indexPath)
+      
+      guard let cell = dequeuedCell as? SearchHistoryTableViewCell else {
+        fatalError("SearchHistoryTableViewCell Casting Fail")
+      }
+      
+      cell.config(text: item.query)
+      
+      return cell
+    })
   
   // MARK: UI
   private let searchController = UISearchController()
@@ -34,8 +50,12 @@ final class HomeViewController: BaseViewController {
   }()
   
   // MARK: Initializer
-  init(viewModel: HomeViewModel) {
+  init(
+    viewModel: HomeViewModel,
+    searchResultViewControllerFactory: ((String) -> SearchResultViewController)?)
+  {
     self.viewModel = viewModel
+    self.searchResultViewControllerFactory = searchResultViewControllerFactory
     super.init()
     self.title = "Home"
     self.tabBarItem.image = UIImage(systemName: "house")
@@ -64,11 +84,9 @@ final class HomeViewController: BaseViewController {
   }
   
   private func setupTableView() {
-    tableView.rx.willBeginDragging
-      .subscribe(with: self, onNext: { owner, _ in
-        owner.searchController.isActive = false
-      })
-      .disposed(by: disposeBag)
+    tableView.register(
+      SearchHistoryTableViewCell.self,
+      forCellReuseIdentifier: SearchHistoryTableViewCell.reuseIdentifier)
   }
   
   // MARK: Layout
@@ -89,14 +107,6 @@ final class HomeViewController: BaseViewController {
   // MARK: Bind
   override func bind() {
     // input
-    let query = searchController.searchBar
-      .rx
-      .text
-      .orEmpty
-      .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
-      .distinctUntilChanged()
-      .asObservable()
-    
     let textDidBeginEditing = searchController.searchBar
       .rx
       .textDidBeginEditing
@@ -107,11 +117,17 @@ final class HomeViewController: BaseViewController {
       .textDidEndEditing
       .asObservable()
     
+    let tableViewWillBeginDragging = tableView
+      .rx
+      .willBeginDragging
+      .asObservable()
+      
     let input = HomeViewModel.Input(
-      query: query,
       textDidBeginEditing: textDidBeginEditing,
-      textDidEndEditing: textDidEndEditing)
+      textDidEndEditing: textDidEndEditing,
+      tableViewWillBeginDragging: tableViewWillBeginDragging)
     
+    // output
     let output = viewModel.transform(input: input)
     
     output.tableViewTopOffset
@@ -129,6 +145,45 @@ final class HomeViewController: BaseViewController {
     output.backgroundColor
       .bind(to: backgroundColorBinder)
       .disposed(by: disposeBag)
+    
+    output.searchHistories
+      .bind(to: tableView.rx.items(dataSource: dataSource))
+      .disposed(by: disposeBag)
+    
+    output.searchControllerIsActive
+      .bind(to: searchController.rx.isActive)
+      .disposed(by: disposeBag)
+    
+    // navigation
+    Observable
+      .zip(tableView.rx.itemSelected, tableView.rx.modelSelected(SearchHistory.self))
+      .subscribe(with: self, onNext: { owner, modelInfo in
+        let (indexPath, searchHistory) = modelInfo
+        guard let vc = owner.searchResultViewControllerFactory?(searchHistory.query) else {
+          return
+        }
+        
+        owner.tableView.deselectRow(at: indexPath, animated: true)
+        owner.navigationController?.pushViewController(vc, animated: true)
+      })
+      .disposed(by: disposeBag)
+  }
+  
+  static func dataSourceFactory() -> RxTableViewSectionedReloadDataSource<SearchHistorySection> {
+    .init(
+      configureCell: { dataSource, tableView, indexPath, item in
+        let dequeuedCell = tableView.dequeueReusableCell(
+          withIdentifier: SearchHistoryTableViewCell.reuseIdentifier,
+          for: indexPath)
+        
+        guard let cell = dequeuedCell as? SearchHistoryTableViewCell else {
+          fatalError("SearchHistoryTableViewCell Casting Fail")
+        }
+        
+        cell.config(text: item.query)
+        
+        return cell
+      })
   }
 }
 
@@ -136,7 +191,7 @@ final class HomeViewController: BaseViewController {
 #Preview {
   let config = AppConfigurationImpl()
   let viewModel = HomeViewModel(appConfiguration: config)
-  let homeViewController = HomeViewController(viewModel: viewModel)
+  let homeViewController = HomeViewController(viewModel: viewModel, searchResultViewControllerFactory: nil)
   let controller = UINavigationController(rootViewController: homeViewController)
   return controller
 }
