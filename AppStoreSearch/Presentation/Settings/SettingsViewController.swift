@@ -10,15 +10,26 @@ import UIKit
 final class SettingsViewController: BaseViewController {
   
   // MARK: UI
-  private let stackView = UIStackView()
+  private let darkModeSwitchContainer: UIView = {
+    let view = UIView()
+    view.backgroundColor = .clear
+    return view
+  }()
+  
+  private let darkModeLabel: UILabel = {
+    return .make(
+      "Dark Mode",
+      size: 16)
+  }()
+  
   private let darkModeSwitch = UISwitch()
   
   // MARK: Properties
-  private let appConfiguration: AppConfiguration
+  private let viewModel: SettingsViewModel
   
   // MARK: Initializer
-  init(appConfiguration: AppConfiguration) {
-    self.appConfiguration = appConfiguration
+  init(viewModel: SettingsViewModel) {
+    self.viewModel = viewModel
     super.init()
     self.title = "Settings"
     self.tabBarItem.image = UIImage(systemName: "gearshape.2")
@@ -29,51 +40,64 @@ final class SettingsViewController: BaseViewController {
     fatalError("init(coder:) has not been implemented")
   }
   
-  // MARK: Life Cycle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    appConfiguration
-      .backgroundColor
-      .bind(to: view.rx.backgroundColor)
-      .disposed(by: disposeBag)
-    
-    appConfiguration.isDarkMode
-      .bind(to: darkModeSwitch.rx.isOn)
-      .disposed(by: disposeBag)
-    
-    darkModeSwitch
+  // MARK: Bind
+  override func bind() {
+    let darkModeSwitchValueChanged = darkModeSwitch
       .rx
       .value
       .changed
       .distinctUntilChanged()
-      .bind(to: appConfiguration.isDarkMode)
+      .asObservable()
+    
+    let input = SettingsViewModel.Input(darkModeSwitchValueChanged: darkModeSwitchValueChanged)
+    
+    let output = viewModel.transform(input: input)
+    output.backgroundColor
+      .bind(to: view.rx.backgroundColor)
+      .disposed(by: disposeBag)
+    
+    output.textColor
+      .bind(to: darkModeLabel.rx.textColor)
+      .disposed(by: disposeBag)
+    
+    output.isDarkMode
+      .bind(to: darkModeSwitch.rx.isOn)
       .disposed(by: disposeBag)
   }
   
   // MARK: Layout
   override func addSubviews() {
     view.add {
-      stackView.add {
+      darkModeSwitchContainer.add {
+        darkModeLabel
         darkModeSwitch
       }
     }
   }
   
   override func setupConstraints() {
-    stackView.snp.makeConstraints { make in
-      make.edges.equalToSuperview()
+    darkModeSwitchContainer.snp.makeConstraints { make in
+      make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+      make.left.equalToSuperview()
+      make.width.equalToSuperview()
+      make.height.equalTo(75)
+    }
+    
+    darkModeLabel.snp.makeConstraints { make in
+      make.centerY.equalToSuperview()
+      make.left.equalToSuperview().offset(30)
     }
     
     darkModeSwitch.snp.makeConstraints { make in
-      make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-      make.left.equalToSuperview().offset(30)
+      make.centerY.equalToSuperview()
+      make.right.equalToSuperview().inset(30)
     }
   }
 }
 
 #Preview {
   let config = AppConfigurationImpl()
-  let controller = SettingsViewController(appConfiguration: config)
+  let viewModel = SettingsViewModel(appConfiguration: config)
+  let controller = SettingsViewController(viewModel: viewModel)
   return controller
 }

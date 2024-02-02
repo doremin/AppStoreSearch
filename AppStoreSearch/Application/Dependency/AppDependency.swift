@@ -30,7 +30,8 @@ extension AppDependency {
     let homeViewModel = HomeViewModel(appConfiguration: appConfiguration)
     let homeViewController = HomeViewController(viewModel: homeViewModel)
     
-    let settingsViewController = SettingsViewController(appConfiguration: appConfiguration)
+    let settingsViewModel = SettingsViewModel(appConfiguration: appConfiguration)
+    let settingsViewController = SettingsViewController(viewModel: settingsViewModel)
     
     let mainTabBarViewModel = MainTabBarViewModel(appConfiguration: appConfiguration)
     let mainTabBarController = MainTabBarController(

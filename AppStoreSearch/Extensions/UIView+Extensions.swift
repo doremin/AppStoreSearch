@@ -21,3 +21,11 @@ struct AddBuilder {
     return views
   }
 }
+
+extension UIStackView {
+  @discardableResult
+  func arrangedAdd(@AddBuilder _ builder: () -> [UIView]) -> UIView {
+    builder().forEach { addArrangedSubview($0) }
+    return self
+  }
+}
