@@ -25,7 +25,6 @@ final class SearchResultViewModel: ViewModel {
   {
     self.query = query
     self.appConfiguration = appConfiguration
-    print(query)
   }
   
   func transform(input: Input) -> Output {

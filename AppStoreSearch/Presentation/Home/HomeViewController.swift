@@ -29,7 +29,8 @@ final class HomeViewController: BaseViewController {
       cell.config(text: item.query)
       
       return cell
-    })
+    },
+    canEditRowAtIndexPath: { _, _ in true })
   
   // MARK: UI
   private let searchController = UISearchController()
@@ -107,6 +108,18 @@ final class HomeViewController: BaseViewController {
   // MARK: Bind
   override func bind() {
     // input
+    let query = searchController.searchBar
+      .rx
+      .text
+      .orEmpty
+      .filter { $0 != "" }
+      .asObservable()
+    
+    let searchButtonClicked = searchController.searchBar
+      .rx
+      .searchButtonClicked
+      .asObservable()
+    
     let textDidBeginEditing = searchController.searchBar
       .rx
       .textDidBeginEditing
@@ -121,11 +134,31 @@ final class HomeViewController: BaseViewController {
       .rx
       .willBeginDragging
       .asObservable()
-      
+    
+    let tableViewItemDeleted = tableView
+      .rx
+      .itemDeleted
+      .asObservable()
+    
+    let tableViewItemSelected = tableView
+      .rx
+      .itemSelected
+      .asObservable()
+    
+    let tableViewModelSelected = tableView
+      .rx
+      .modelSelected(SearchHistory.self)
+      .asObservable()
+    
     let input = HomeViewModel.Input(
+      query: query,
+      searchButtonClicked: searchButtonClicked,
       textDidBeginEditing: textDidBeginEditing,
       textDidEndEditing: textDidEndEditing,
-      tableViewWillBeginDragging: tableViewWillBeginDragging)
+      tableViewWillBeginDragging: tableViewWillBeginDragging,
+      tableViewItemDeleted: tableViewItemDeleted,
+      tableViewItemSelected: tableViewItemSelected,
+      tableViewModelSelected: tableViewModelSelected)
     
     // output
     let output = viewModel.transform(input: input)
@@ -154,10 +187,7 @@ final class HomeViewController: BaseViewController {
       .bind(to: searchController.rx.isActive)
       .disposed(by: disposeBag)
     
-    // navigation
-    // Todo: move to viewmodel and send false to IsActive
-    Observable
-      .zip(tableView.rx.itemSelected, tableView.rx.modelSelected(SearchHistory.self))
+    output.selectedModel
       .subscribe(with: self, onNext: { owner, modelInfo in
         let (indexPath, searchHistory) = modelInfo
         owner.tableView.deselectRow(at: indexPath, animated: true)
@@ -165,19 +195,7 @@ final class HomeViewController: BaseViewController {
       })
       .disposed(by: disposeBag)
     
-    let query = searchController.searchBar
-      .rx
-      .text
-      .orEmpty
-      .filter { $0 != "" }
-    
-    let searchButtonClicked = searchController.searchBar
-      .rx
-      .searchButtonClicked
-    
-    // Todo: move to viewmodel and send false to IsActive
-    query
-      .sample(searchButtonClicked)
+    output.queryWhenSearchButtonClicked
       .subscribe(with: self, onNext: { owner, query in
         owner.presentSearchResultViewController(query: query)
       })

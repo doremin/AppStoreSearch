@@ -13,11 +13,18 @@ import RxDataSources
 
 final class HomeViewModel: ViewModel {
   
+  typealias ModelInfo = (IndexPath, SearchHistory)
+  
   // MARK: Input, Output
   struct Input {
+    let query: Observable<String>
+    let searchButtonClicked: Observable<Void>
     let textDidBeginEditing: Observable<Void>
     let textDidEndEditing: Observable<Void>
     let tableViewWillBeginDragging: Observable<Void>
+    let tableViewItemDeleted: Observable<IndexPath>
+    let tableViewItemSelected: Observable<IndexPath>
+    let tableViewModelSelected: Observable<SearchHistory>
   }
   
   struct Output {
@@ -25,6 +32,8 @@ final class HomeViewModel: ViewModel {
     let backgroundColor: Observable<UIColor>
     let searchHistories: Observable<[SearchHistorySection]>
     let searchControllerIsActive: Observable<Bool>
+    let selectedModel: Observable<ModelInfo>
+    let queryWhenSearchButtonClicked: Observable<String>
   }
   
   // MARK: Properties
@@ -42,11 +51,13 @@ final class HomeViewModel: ViewModel {
   func transform(input: Input) -> Output {
     let tableViewTopOffSet = PublishSubject<CGFloat>()
     
-    let searchHistories = SearchHistorySection(
+    // Todo: Replace Search Histories Dummy
+    let searchHistories = BehaviorRelay(value: [SearchHistorySection(
       items: [
         SearchHistory(query: "aa"),
         SearchHistory(query: "bb")
       ])
+    ])
     
     input.textDidBeginEditing
       .map { CGFloat(120) }
@@ -57,14 +68,34 @@ final class HomeViewModel: ViewModel {
       .map { CGFloat(156) }
       .bind(to: tableViewTopOffSet)
       .disposed(by: disposeBag)
+      
+    Observable.zip(searchHistories, input.tableViewItemDeleted)
+      .sample(input.tableViewItemDeleted)
+      .subscribe(onNext: { section, indexPath in
+        var currentSection = section[indexPath.section]
+        currentSection.items.remove(at: indexPath.row)
+        searchHistories.accept([currentSection])
+      })
+      .disposed(by: disposeBag)
     
-    let searchControllerIsActive = input.tableViewWillBeginDragging
-      .map { false }
+    let searchControllerIsActive = Observable.merge(
+      input.tableViewItemSelected.map { _ in return },
+      input.tableViewWillBeginDragging,
+      input.searchButtonClicked)
+      .delay(.milliseconds(100), scheduler: MainScheduler.instance)
+      .map { _ in false }
+    
+    let selectedModel = Observable.zip(input.tableViewItemSelected, input.tableViewModelSelected)
+    
+    let queryWhenSearchButtonClicked = input.query
+      .sample(input.searchButtonClicked)
     
     return Output(
       tableViewTopOffset: tableViewTopOffSet,
       backgroundColor: appConfiguration.backgroundColor,
-      searchHistories: Observable.of([searchHistories]),
-      searchControllerIsActive: searchControllerIsActive)
+      searchHistories: searchHistories.asObservable(),
+      searchControllerIsActive: searchControllerIsActive,
+      selectedModel: selectedModel,
+      queryWhenSearchButtonClicked: queryWhenSearchButtonClicked)
   }
 }
