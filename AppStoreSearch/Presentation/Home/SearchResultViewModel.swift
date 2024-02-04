@@ -16,18 +16,22 @@ final class SearchResultViewModel: ViewModel {
   
   private let query: String
   private let appConfiguration: AppConfiguration
+  private let appStoreSearchRepository: AppStoreSearchRepository
   
   var disposeBag = DisposeBag()
   
   init(
     query: String,
-    appConfiguration: AppConfiguration)
+    appConfiguration: AppConfiguration,
+    appStoreSearchRepository: AppStoreSearchRepository)
   {
     self.query = query
     self.appConfiguration = appConfiguration
+    self.appStoreSearchRepository = appStoreSearchRepository
   }
   
   func transform(input: Input) -> Output {
+    
     return .init()
   }
 }
