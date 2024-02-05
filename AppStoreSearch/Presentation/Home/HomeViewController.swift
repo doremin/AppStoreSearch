@@ -88,6 +88,7 @@ final class HomeViewController: BaseViewController {
     tableView.register(
       SearchHistoryTableViewCell.self,
       forCellReuseIdentifier: SearchHistoryTableViewCell.reuseIdentifier)
+    tableView.rowHeight = 44
   }
   
   // MARK: Layout

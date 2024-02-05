@@ -79,7 +79,7 @@ final class HomeViewModel: ViewModel {
       .disposed(by: disposeBag)
     
     let searchControllerIsActive = Observable.merge(
-      input.tableViewItemSelected.map { _ in return },
+      input.tableViewItemSelected.map { _ in },
       input.tableViewWillBeginDragging,
       input.searchButtonClicked)
       .delay(.milliseconds(100), scheduler: MainScheduler.instance)

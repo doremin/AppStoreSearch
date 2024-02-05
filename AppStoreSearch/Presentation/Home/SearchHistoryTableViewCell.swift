@@ -38,6 +38,7 @@ final class SearchHistoryTableViewCell: BaseTableViewCell {
     queryLabel.text = text
   }
   
+  // MARK: Prepare For Reuse
   override func prepareForReuse() {
     queryLabel.text = nil
   }
