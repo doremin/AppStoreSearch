@@ -29,8 +29,7 @@ final class HomeViewController: BaseViewController {
       cell.config(text: item.query)
       
       return cell
-    },
-    canEditRowAtIndexPath: { _, _ in true })
+    })
   
   // MARK: UI
   private let searchController = UISearchController()
@@ -151,6 +150,16 @@ final class HomeViewController: BaseViewController {
       .modelSelected(SearchHistory.self)
       .asObservable()
     
+    let viewWillAppear = self
+      .rx
+      .viewWillAppear
+      .asObservable()
+    
+    let viewWillDisappear = self
+      .rx
+      .viewWillDisappear
+      .asObservable()
+    
     let input = HomeViewModel.Input(
       query: query,
       searchButtonClicked: searchButtonClicked,
@@ -159,7 +168,9 @@ final class HomeViewController: BaseViewController {
       tableViewWillBeginDragging: tableViewWillBeginDragging,
       tableViewItemDeleted: tableViewItemDeleted,
       tableViewItemSelected: tableViewItemSelected,
-      tableViewModelSelected: tableViewModelSelected)
+      tableViewModelSelected: tableViewModelSelected,
+      viewWillAppear: viewWillAppear,
+      viewWillDisappear: viewWillDisappear)
     
     // output
     let output = viewModel.transform(input: input)
@@ -232,7 +243,8 @@ final class HomeViewController: BaseViewController {
 @available(iOS 17.0, *)
 #Preview {
   let config = AppConfigurationImpl()
-  let viewModel = HomeViewModel(appConfiguration: config)
+  let repository = AppStoreSearchHistoryRepositoryImpl(container: PersistentContainerImpl.shared)
+  let viewModel = HomeViewModel(appConfiguration: config, appStoreSearchHistoryRepository: repository)
   let homeViewController = HomeViewController(viewModel: viewModel, searchResultViewControllerFactory: nil)
   let controller = UINavigationController(rootViewController: homeViewController)
   return controller

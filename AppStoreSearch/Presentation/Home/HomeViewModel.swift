@@ -25,6 +25,8 @@ final class HomeViewModel: ViewModel {
     let tableViewItemDeleted: Observable<IndexPath>
     let tableViewItemSelected: Observable<IndexPath>
     let tableViewModelSelected: Observable<SearchHistory>
+    let viewWillAppear: Observable<Bool>
+    let viewWillDisappear: Observable<Bool>
   }
   
   struct Output {
@@ -38,26 +40,30 @@ final class HomeViewModel: ViewModel {
   
   // MARK: Properties
   private let appConfiguration: AppConfiguration
+  private let appStoreSearchHistoryRepository: AppStoreSearchHistoryRepository
   
   // MARK: Dispose Bag
   var disposeBag = DisposeBag()
   
   // MARK: Initializer
-  init(appConfiguration: AppConfiguration) {
+  init(
+    appConfiguration: AppConfiguration,
+    appStoreSearchHistoryRepository: AppStoreSearchHistoryRepository)
+  {
     self.appConfiguration = appConfiguration
+    self.appStoreSearchHistoryRepository = appStoreSearchHistoryRepository
   }
   
   // MARK: Transform Input -> Output
   func transform(input: Input) -> Output {
     let tableViewTopOffSet = PublishSubject<CGFloat>()
     
-    // Todo: Replace Search Histories Dummy
-    let searchHistories = BehaviorRelay(value: [SearchHistorySection(
-      items: [
-        SearchHistory(query: "aa"),
-        SearchHistory(query: "bb")
-      ])
-    ])
+    let searchHistories = input.viewWillAppear
+      .withUnretained(self)
+      .flatMap { owner, _ in
+        return owner.appStoreSearchHistoryRepository.fetchHistories(limit: 20)
+          .map { [SearchHistorySection(items: $0)] }
+      }
     
     input.textDidBeginEditing
       .map { CGFloat(120) }
@@ -69,15 +75,6 @@ final class HomeViewModel: ViewModel {
       .bind(to: tableViewTopOffSet)
       .disposed(by: disposeBag)
       
-    Observable.zip(searchHistories, input.tableViewItemDeleted)
-      .sample(input.tableViewItemDeleted)
-      .subscribe(onNext: { section, indexPath in
-        var currentSection = section[indexPath.section]
-        currentSection.items.remove(at: indexPath.row)
-        searchHistories.accept([currentSection])
-      })
-      .disposed(by: disposeBag)
-    
     let searchControllerIsActive = Observable.merge(
       input.tableViewItemSelected.map { _ in },
       input.tableViewWillBeginDragging,
@@ -89,6 +86,16 @@ final class HomeViewModel: ViewModel {
     
     let queryWhenSearchButtonClicked = input.query
       .sample(input.searchButtonClicked)
+    
+    queryWhenSearchButtonClicked
+      .withUnretained(self)
+      .flatMap { owner, query in
+        let history = SearchHistory(query: query)
+        
+        return owner.appStoreSearchHistoryRepository.saveHistory(history: history)
+      }
+      .subscribe()
+      .disposed(by: disposeBag)
     
     return Output(
       tableViewTopOffset: tableViewTopOffSet,

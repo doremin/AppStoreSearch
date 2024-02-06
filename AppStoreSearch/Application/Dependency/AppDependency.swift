@@ -30,8 +30,11 @@ extension AppDependency {
     let loggerPlugin = AppStoreAPILoggerPlugin()
     let provider = MoyaProvider<AppStoreAPI>(plugins: [loggerPlugin])
     let appStoreSearchRepository = AppStoreSearchRepositoryImpl(provider: provider)
+    let appStoreSearchHistoryRepository = AppStoreSearchHistoryRepositoryImpl(container: PersistentContainerImpl.shared)
     
-    let homeViewModel = HomeViewModel(appConfiguration: appConfiguration)
+    let homeViewModel = HomeViewModel(
+      appConfiguration: appConfiguration,
+      appStoreSearchHistoryRepository: appStoreSearchHistoryRepository)
     let homeViewController = HomeViewController(
       viewModel: homeViewModel,
       searchResultViewControllerFactory: { query in
