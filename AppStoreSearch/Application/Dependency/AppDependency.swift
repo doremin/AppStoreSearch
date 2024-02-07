@@ -42,7 +42,15 @@ extension AppDependency {
           query: query,
           appConfiguration: appConfiguration,
           appStoreSearchRepository: appStoreSearchRepository)
-        let searchResultViewController = SearchResultViewController(viewModel: searchResultViewModel)
+        let searchResultViewController = SearchResultViewController(
+          viewModel: searchResultViewModel,
+          cellViewModelFacotry: { searchResult in
+            let viewModel = SearchResultTableViewCellViewModel(
+              appConfiguration: appConfiguration,
+              searchResult: searchResult)
+            
+            return viewModel
+          })
         
         return searchResultViewController
       })

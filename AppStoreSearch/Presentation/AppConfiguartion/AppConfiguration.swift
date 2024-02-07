@@ -14,6 +14,7 @@ protocol AppConfiguration {
   var isDarkMode: BehaviorRelay<Bool> { get }
   var textColor: Observable<UIColor> { get }
   var backgroundColor: Observable<UIColor> { get }
+  var displayScale: Observable<CGFloat> { get }
 }
 
 final class AppConfigurationImpl: AppConfiguration {
@@ -31,6 +32,7 @@ final class AppConfigurationImpl: AppConfiguration {
   
   let textColor: Observable<UIColor>
   let backgroundColor: Observable<UIColor>
+  let displayScale: Observable<CGFloat>
   
   // MARK: Dispose Bag
   private var disposeBag = DisposeBag()
@@ -47,5 +49,7 @@ final class AppConfigurationImpl: AppConfiguration {
         UserDefaults.standard.set(value, forKey: UserDefaultsKeys.isDarkMode.rawValue)
       })
       .disposed(by: disposeBag)
+    
+    displayScale = Observable<CGFloat>.just(UITraitCollection.current.displayScale)
   }
 }

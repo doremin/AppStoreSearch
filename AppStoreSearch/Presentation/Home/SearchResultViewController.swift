@@ -17,29 +17,41 @@ final class SearchResultViewController: BaseViewController {
   
   // MARK: Properties
   private let viewModel: SearchResultViewModel
-  private let datsSource = RxTableViewSectionedReloadDataSource<SearchResultSection>(
-    configureCell: { dataSource, tableView, indexPath, item in
-      let dequeuedCell = tableView.dequeueReusableCell(
-        withIdentifier: SearchResultTableViewCell.reuseIdentifier,
-        for: indexPath)
-      
-      guard let cell = dequeuedCell as? SearchResultTableViewCell else {
-        fatalError("SearchResultTalbeViewCell Casting Fail")
-      }
-      
-      cell.config(title: item.trackName)
-      
-      return cell
-    })
+  private let dataSource: RxTableViewSectionedReloadDataSource<SearchResultSection>
   
   // MARK: Initializer
-  init(viewModel: SearchResultViewModel) {
+  init(
+    viewModel: SearchResultViewModel,
+    cellViewModelFacotry: @escaping (SearchResponse.SearchResult) -> SearchResultTableViewCellViewModel
+  ) {
     self.viewModel = viewModel
+    self.dataSource = Self.dataSourceFacotry(cellViewModelFacotry: cellViewModelFacotry)
     super.init()
   }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  // MARK: DataSource Facotry
+  private static func dataSourceFacotry(
+    cellViewModelFacotry: @escaping (SearchResponse.SearchResult) -> SearchResultTableViewCellViewModel)
+  -> RxTableViewSectionedReloadDataSource<SearchResultSection> {
+    return .init(
+      configureCell: { dataSource, tableView, indexPath, item in
+        let dequeuedCell = tableView.dequeueReusableCell(
+          withIdentifier: SearchResultTableViewCell.reuseIdentifier,
+          for: indexPath)
+        
+        guard let cell = dequeuedCell as? SearchResultTableViewCell else {
+          fatalError("SearchResultTalbeViewCell Casting Fail")
+        }
+        
+        let viewModel = cellViewModelFacotry(item)
+        cell.bind(viewModel: viewModel)
+        
+        return cell
+      })
   }
     
   // MARK: Life Cycle
@@ -89,7 +101,7 @@ final class SearchResultViewController: BaseViewController {
       .disposed(by: disposeBag)
     
     output.searchResponses
-      .bind(to: tableView.rx.items(dataSource: datsSource))
+      .bind(to: tableView.rx.items(dataSource: dataSource))
       .disposed(by: disposeBag)
     
     output.isLoadingIndicatorActive
