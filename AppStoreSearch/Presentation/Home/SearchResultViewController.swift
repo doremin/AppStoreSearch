@@ -66,7 +66,8 @@ final class SearchResultViewController: BaseViewController {
     tableView.register(
       SearchResultTableViewCell.self,
       forCellReuseIdentifier: SearchResultTableViewCell.reuseIdentifier)
-    tableView.rowHeight = 100
+    tableView.rowHeight = 400
+    tableView.separatorStyle = .none
   }
   
   // MARK: Layout

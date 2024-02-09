@@ -34,6 +34,7 @@ extension SearchResponse.SearchResult {
       screenshotUrls: [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/17/78/68/177868f6-193c-b520-6d8d-318efde4a61d/b527bf39-ad06-4b34-a2cc-cf5e21fd8fc0_Fitness-iPhone5p5-Vert-DawnC-USEN-Wrapper1.png/392x696bb.png",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/17/78/68/177868f6-193c-b520-6d8d-318efde4a61d/b527bf39-ad06-4b34-a2cc-cf5e21fd8fc0_Fitness-iPhone5p5-Vert-DawnC-USEN-Wrapper1.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/17/78/68/177868f6-193c-b520-6d8d-318efde4a61d/b527bf39-ad06-4b34-a2cc-cf5e21fd8fc0_Fitness-iPhone5p5-Vert-DawnC-USEN-Wrapper1.png/392x696bb.png",
       ],
       trackCensoredName: "피트니스",
       userRatingCount: 374,
