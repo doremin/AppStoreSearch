@@ -62,4 +62,36 @@ final class AppConfigurationTests: XCTestCase {
     
     XCTAssertEqual(observer.events, expectedEvents)
   }
+  
+  func test_whenChangeDarkMode_thenBackGroundColorChanged() {
+    // given
+    let observer = scheduler.createObserver(UIColor.self)
+    
+    sut.backgroundColor
+      .skip(1)
+      .subscribe(observer)
+      .disposed(by: disposeBag)
+    
+    let testEvents: [Recorded<Event<Bool>>] = [
+      .next(1, true),
+      .next(2, false),
+      .next(3, true),
+    ]
+    
+    // when
+    scheduler.createColdObservable(testEvents)
+      .bind(to: sut.isDarkMode)
+      .disposed(by: disposeBag)
+    
+    scheduler.start()
+    
+    // then
+    let expectedEvents: [Recorded<Event<UIColor>>] = [
+      .next(1, .black),
+      .next(2, .white),
+      .next(3, .black),
+    ]
+    
+    XCTAssertEqual(observer.events, expectedEvents)
+  }
 }
