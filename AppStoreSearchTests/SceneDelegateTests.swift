@@ -10,10 +10,19 @@ import XCTest
 
 final class SceneDelegateTests: XCTestCase {
   
+  var sut: SceneDelegate!
+
+  override func setUp() {
+    super.setUp()
+    sut = SceneDelegate()
+  }
+  
+  override func tearDown() {
+    sut = nil
+    super.tearDown()
+  }
+  
   func test_whenInitialized_thenDependencyIsNil() {
-    // when
-    let sut = SceneDelegate()
-    
     // then
     XCTAssertNil(sut.dependency)
   }
