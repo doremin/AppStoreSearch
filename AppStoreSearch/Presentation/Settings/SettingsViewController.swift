@@ -95,6 +95,7 @@ final class SettingsViewController: BaseViewController {
   }
 }
 
+@available(iOS 17.0, *)
 #Preview {
   let config = AppConfigurationImpl()
   let viewModel = SettingsViewModel(appConfiguration: config)

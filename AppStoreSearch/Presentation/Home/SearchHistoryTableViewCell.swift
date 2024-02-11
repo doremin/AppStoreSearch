@@ -44,6 +44,7 @@ final class SearchHistoryTableViewCell: BaseTableViewCell {
   }
 }
 
+@available(iOS 17.0, *)
 #Preview {
   let cell = SearchHistoryTableViewCell()
   cell.config(text: "TEST")
