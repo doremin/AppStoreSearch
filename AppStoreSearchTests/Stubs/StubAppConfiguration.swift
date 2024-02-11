@@ -19,10 +19,10 @@ final class StubAppConfiguration: AppConfiguration {
   let displayScale: Observable<CGFloat>
   
   init(
-    isDarkMode: Bool,
-    textColor: UIColor,
-    backgroundColor: UIColor,
-    displayScale: CGFloat)
+    isDarkMode: Bool = true,
+    textColor: UIColor = .white,
+    backgroundColor: UIColor = .black,
+    displayScale: CGFloat = 3.0)
   {
     self.isDarkMode = BehaviorRelay(value: isDarkMode)
     self.textColor = .just(textColor)
