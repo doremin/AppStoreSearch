@@ -72,6 +72,11 @@ final class HomeViewController: BaseViewController {
     
     setupSearchController()
     setupTableView()
+    setupAccesibility()
+  }
+  
+  private func setupAccesibility() {
+    searchController.searchBar.searchTextField.accessibilityIdentifier = AccessibilityID.homeSearchField
   }
   
   private func setupSearchController() {
