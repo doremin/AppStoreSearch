@@ -22,17 +22,20 @@ final class HomeViewControllerTests: XCTestCase {
         appConfiguration: StubAppConfiguration(),
         appStoreSearchHistoryRepository: StubAppStoreSearchHistoryRepository()),
       searchResultViewControllerFactory: nil)
-    
-    // make viewDidLoad() called
-    _ = sut.view
   }
   
   func test_whenViewDidLoaded_thenSubviewsAdded() {
+    // given
     let expected = """
     \(UIView.typeString)
     --\(UITableView.typeString)
     """
+    
+    // when
+    // make viewDidLoad() called
+    _ = sut.view
 
+    // then
     XCTAssertEqual(expected, sut.view.subviewsSnapshot)
   }
   
