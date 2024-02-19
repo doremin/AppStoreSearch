@@ -5,6 +5,7 @@
 ## 구현 기능
 * Dark Mode 지원
 * Core Data를 이용한 search history 저장
+    * Todo: Search Result도 Core Data에 저장하기
 * [Pure DI](https://blog.ploeh.dk/2014/06/10/pure-di/)를 이용한 Dependency Injection
 * UITest, Unit Test 일부 구현
 * [RxSwift](https://github.com/ReactiveX/RxSwift)를 이용한 Input - Output 구조의 MVVM 구현
