@@ -8,7 +8,7 @@
 import XCTest
 
 final class AppDelegateTests: XCTestCase {
-  func test_whenLaunched_thenAppDelegateIsTestAppDelegate() {
+  func test_whenLaunched_thenAppDelegateIsStubAppDelegate() {
     XCTAssertTrue(UIApplication.shared.delegate is StubAppDelegate)
   }
 }
