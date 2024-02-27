@@ -13,7 +13,7 @@ final class SearchHistoryTableViewCell: BaseTableViewCell {
   static let reuseIdentifier = "SearchHistoryTableViewCell"
   
   // MARK: UI
-  private let queryLabel: UILabel = {
+  let queryLabel: UILabel = {
     return .make(
       "",
       size: 16,
